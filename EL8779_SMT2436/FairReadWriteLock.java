@@ -3,8 +3,36 @@ package EL8779_SMT2436;
 
 public class FairReadWriteLock {
 
+	private int readers;
+	private int writers;
+	private int futureWriters;
+	
 	public FairReadWriteLock() {
-		// TODO Auto-generated constructor stub
+		readers = 0;
+		writers = 0;
+		futureWriters = 0;
+	}
+	public synchronized void beginRead() throws InterruptedException {
+		while(writers > 0 || futureWriters > 0){
+			wait();
+		}
+		readers++;
+	}
+	public synchronized void beginWrite() throws InterruptedException{
+		futureWriters++;
+		while(writers > 0 || readers > 0){
+			wait();
+		}
+		futureWriters--;
+		writers++;
+	}
+	public synchronized void endRead() throws InterruptedException {
+		readers--;
+		notifyAll();
+	}
+	public synchronized void endWrite() throws InterruptedException{
+		writers--;
+		notifyAll();
 	}
 
 }
