@@ -2,7 +2,7 @@ package EL8779_SMT2436;
 
 public class GardenTester {
 
-	static int goal = 100;
+	static int goal = 10;
 	static Garden garden;
 	
 	public static void test(){
@@ -15,13 +15,9 @@ public class GardenTester {
 			public void run() {
 				while (garden.count() < goal){
 					try {
-						//System.out.println("Go Newt");
 						try{
 						garden.startDigging();
-						}
-						//System.out.println("Stop Newt");
-						finally{garden.doneDigging();}
-						//System.out.println("Yay");
+						}finally{garden.doneDigging();}
 						
 					} catch (InterruptedException e) {
 						System.out.println("Newton the Digger Failed");
@@ -34,12 +30,11 @@ public class GardenTester {
 				while (garden.count() < goal){
 					try {
 						try{
-						//System.out.println("Go Ben");
-						garden.startSeeding();}
-						//System.out.println("Stop Ben");
-						finally{garden.doneSeeding();}
-						//System.out.println("Yay Ben");
-						  
+						garden.startSeeding();
+						}
+						finally{
+							garden.doneSeeding();
+						}	  
 					} catch (InterruptedException e) {
 						System.out.println("Benjamin the Seeder Failed");
 					}
@@ -51,11 +46,11 @@ public class GardenTester {
 			public void run() {
 				while (garden.count() < goal){
 					try {
-						//System.out.println("Go Mary");
-						try{garden.startFilling();}
-						//System.out.println("Stop Mary");
-						finally{garden.doneFilling();}
-						//System.out.println("Yay Mary");
+						try{
+							garden.startFilling();
+						}finally{
+							garden.doneFilling();
+						}
 					} catch (InterruptedException e) {
 						System.out.println("Mary the Filler Failed");
 					}
@@ -75,7 +70,7 @@ public class GardenTester {
 						garden.startFilling();
 						garden.doneFilling();
 					} catch (InterruptedException e) {
-						System.out.println("Mary the Filler Failed");
+						System.out.println("Omnipotent Worker Failed");
 					}
 
 				}
@@ -83,11 +78,18 @@ public class GardenTester {
 		};
 		
 		System.out.println("Starting...");
+		
 		Mary.start();
 		Newton.start();
 		Benjamin.start();
-		//All.run();
 		
+		try{
+			Newton.join();
+			Benjamin.join();
+			Mary.join();
+		}catch (Exception e){}
+		
+		//All.run();
 	    System.out.println("GARDEN COUNT: "+garden.count());
 	}
 

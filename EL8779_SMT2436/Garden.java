@@ -10,7 +10,7 @@ public class Garden {
 	private volatile int emptyHoles;
 	private volatile int seededHoles;
 	private volatile int doneHoles;
-	private volatile boolean shovel = true;
+	//private volatile boolean shovel = true;
 	
 	ReentrantLock shovelLock = new ReentrantLock();
 	ReentrantLock workLock = new ReentrantLock();
@@ -30,71 +30,51 @@ public class Garden {
 		doneHoles = 0;
 	}
 	
-	public synchronized void startDigging() throws InterruptedException{
-		shovelLock.lock();
-		
-		
-		
+	public void startDigging() throws InterruptedException{	
 		workLock.lock();
-		//System.out.println("startDigging");
 		while(emptyHoles+seededHoles >= MAX_UNFILLEDHOLES){
-			shovelLock.unlock();
 			lessUnfilledHoles.await();  //await until there is lessEmptyHoles
 		}
-		//System.out.println("get dig shovel");
+		shovelLock.lock();
 		emptyHoles++;
 		
 	}
-	public synchronized void doneDigging(){
-		shovelLock.unlock();
+	public void doneDigging(){
 		moreEmptyHoles.signalAll();	//there are moreEmptyHoles
 		workLock.unlock();
-		
-		//System.out.println("End Digging "+doneHoles);
-		
+		shovelLock.unlock();	
 	}
-	public synchronized void startSeeding() throws InterruptedException{
+	public void startSeeding() throws InterruptedException{
 		workLock.lock();
-		//System.out.println("Start Seeding");
 		while(emptyHoles <= 0){
 			moreEmptyHoles.await();
 		}
 		seededHoles++;
 		emptyHoles--;
 	}
-	public synchronized void doneSeeding(){
+	public  void doneSeeding(){
 		moreSeededHoles.signalAll();	//there are moreSeededHoles
 		workLock.unlock();
 		//System.out.println("End Seeding");
 		
 	}
-	public synchronized void startFilling() throws InterruptedException{
-		shovelLock.lock();
-		workLock.lock();
-		//System.out.println("Start Filling");
+	public void startFilling() throws InterruptedException{
+		workLock.lock();		
 		while(seededHoles <= 0){
-			//System.out.println("still waiting to fill");
-			shovelLock.unlock();
-			moreSeededHoles.await(); //wait until there are moreSeededHoles
-			
-		}
-		//System.out.println("get fill shovel");
-		
-			
+			moreSeededHoles.await(); //wait until there are moreSeededHoles	
+		}	
+		shovelLock.lock();
 		seededHoles--;
 		doneHoles++;		
-
 	}
 	
-	public synchronized void doneFilling(){
+	public void doneFilling(){
 		shovelLock.unlock();
 		lessUnfilledHoles.signalAll();
-		workLock.unlock();	
-		
-		//System.out.println("End Filling");
+		workLock.unlock();
 	}
 	
-	public synchronized int count(){
+	public int count(){
 		return doneHoles;
 	}
 
