@@ -23,8 +23,13 @@ public class FairReadWriteLock {
 		while(writers > 0 || readers > 0){
 			wait();
 		}
-		futureWriters--;
+		
+		//TODO: I reversed  the order of the two statements. In the original order,
+		//if interrupted between the two, futureWriters and writers may both be temporarily 0,
+		//which would allow a read to begin
+		
 		writers++;
+		futureWriters--;
 	}
 	public synchronized void endRead() throws InterruptedException {
 		readers--;
