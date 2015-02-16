@@ -7,8 +7,6 @@ public class GardenTester {
 	
 	public static void test(){
 		
-		
-		
 		garden = new Garden(10);
 		
 		Thread Newton = new Thread() {
