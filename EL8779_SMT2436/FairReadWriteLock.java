@@ -2,7 +2,7 @@
 package EL8779_SMT2436;
 
 public class FairReadWriteLock {
-
+	
 	private int readers;
 	private int writers;
 	private int futureWriters;
@@ -19,7 +19,7 @@ public class FairReadWriteLock {
 		readers++;
 	}
 	public synchronized void beginWrite() throws InterruptedException{
-		futureWriters++;
+		futureWriters++;//TODO stop adding future Writers when a reader is on front
 		while(writers > 0 || readers > 0){
 			wait();
 		}
@@ -34,5 +34,8 @@ public class FairReadWriteLock {
 		writers--;
 		notifyAll();
 	}
+	
+	
+	
 
 }
