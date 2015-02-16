@@ -7,18 +7,21 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Garden {
 
 	private final int MAX_UNFILLEDHOLES;
-	private int emptyHoles;
-	private int seededHoles;
-	private int doneHoles;
-	//int holesDone;
+	private volatile int emptyHoles;
+	private volatile int seededHoles;
+	private volatile int doneHoles;
+	private volatile boolean shovel = true;
 	
 	ReentrantLock shovelLock = new ReentrantLock();
-	ReentrantLock something = new ReentrantLock();
+	ReentrantLock workLock = new ReentrantLock();
 	
-	
-	
-	Condition shovelAvailable = shovelLock.newCondition();
+	Condition shovelAvail = shovelLock.newCondition();
 	Condition shovelTaken = shovelLock.newCondition();
+	
+	Condition moreEmptyHoles = workLock.newCondition();
+	//Condition lessEmptyHoles = workLock.newCondition();
+	Condition lessUnfilledHoles = workLock.newCondition();
+	Condition moreSeededHoles = workLock.newCondition(); 
 	
 	public Garden(int MAX) {
 		this.MAX_UNFILLEDHOLES = MAX;
@@ -27,58 +30,71 @@ public class Garden {
 		doneHoles = 0;
 	}
 	
-	public void startDigging() throws InterruptedException{
-
-		while(emptyHoles >= MAX_UNFILLEDHOLES){
-			wait();
-		}
-		
+	public synchronized void startDigging() throws InterruptedException{
 		shovelLock.lock();
-		try{
-			
-			
-		}finally{
+		
+		
+		
+		workLock.lock();
+		//System.out.println("startDigging");
+		while(emptyHoles+seededHoles >= MAX_UNFILLEDHOLES){
 			shovelLock.unlock();
+			lessUnfilledHoles.await();  //await until there is lessEmptyHoles
 		}
-		
-		
+		//System.out.println("get dig shovel");
 		emptyHoles++;
 		
 	}
-	public void doneDigging(){
+	public synchronized void doneDigging(){
+		shovelLock.unlock();
+		moreEmptyHoles.signalAll();	//there are moreEmptyHoles
+		workLock.unlock();
+		
+		//System.out.println("End Digging "+doneHoles);
 		
 	}
-	public void startSeeding() throws InterruptedException{
+	public synchronized void startSeeding() throws InterruptedException{
+		workLock.lock();
+		//System.out.println("Start Seeding");
 		while(emptyHoles <= 0){
-			wait();
+			moreEmptyHoles.await();
 		}
 		seededHoles++;
 		emptyHoles--;
-	
 	}
-	public void doneSeeding(){
+	public synchronized void doneSeeding(){
+		moreSeededHoles.signalAll();	//there are moreSeededHoles
+		workLock.unlock();
+		//System.out.println("End Seeding");
 		
 	}
-	public void startFilling() throws InterruptedException{
-		
-		while(seededHoles <= 0){
-			wait();
-		}
-		
+	public synchronized void startFilling() throws InterruptedException{
 		shovelLock.lock();
-		try{
-			seededHoles--;
-		}finally{
+		workLock.lock();
+		//System.out.println("Start Filling");
+		while(seededHoles <= 0){
+			//System.out.println("still waiting to fill");
 			shovelLock.unlock();
+			moreSeededHoles.await(); //wait until there are moreSeededHoles
+			
 		}
+		//System.out.println("get fill shovel");
 		
-		
-	}
-	public void doneFilling(){
-		doneHoles++;
+			
+		seededHoles--;
+		doneHoles++;		
+
 	}
 	
-	public int count(){
+	public synchronized void doneFilling(){
+		shovelLock.unlock();
+		lessUnfilledHoles.signalAll();
+		workLock.unlock();	
+		
+		//System.out.println("End Filling");
+	}
+	
+	public synchronized int count(){
 		return doneHoles;
 	}
 
