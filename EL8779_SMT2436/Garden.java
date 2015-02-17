@@ -10,16 +10,11 @@ public class Garden {
 	private volatile int emptyHoles;
 	private volatile int seededHoles;
 	private volatile int doneHoles;
-	//private volatile boolean shovel = true;
 	
 	ReentrantLock shovelLock = new ReentrantLock();
 	ReentrantLock workLock = new ReentrantLock();
 	
-	Condition shovelAvail = shovelLock.newCondition();
-	Condition shovelTaken = shovelLock.newCondition();
-	
 	Condition moreEmptyHoles = workLock.newCondition();
-	//Condition lessEmptyHoles = workLock.newCondition();
 	Condition lessUnfilledHoles = workLock.newCondition();
 	Condition moreSeededHoles = workLock.newCondition(); 
 	
@@ -28,8 +23,7 @@ public class Garden {
 		emptyHoles = 0;
 		seededHoles = 0;
 		doneHoles = 0;
-	}
-	
+	}	
 	public void startDigging() throws InterruptedException{	
 		workLock.lock();
 		while(emptyHoles+seededHoles >= MAX_UNFILLEDHOLES){
@@ -55,8 +49,6 @@ public class Garden {
 	public  void doneSeeding(){
 		moreSeededHoles.signalAll();	//there are moreSeededHoles
 		workLock.unlock();
-		//System.out.println("End Seeding");
-		
 	}
 	public void startFilling() throws InterruptedException{
 		workLock.lock();		
@@ -67,17 +59,12 @@ public class Garden {
 		seededHoles--;
 		doneHoles++;		
 	}
-	
 	public void doneFilling(){
 		shovelLock.unlock();
 		lessUnfilledHoles.signalAll();
 		workLock.unlock();
 	}
-	
 	public int count(){
 		return doneHoles;
 	}
-
-
-	
 }
