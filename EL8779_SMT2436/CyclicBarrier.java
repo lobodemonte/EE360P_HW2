@@ -6,12 +6,12 @@ import java.util.concurrent.Semaphore;
 public class CyclicBarrier {
 
 	Semaphore semaphore;
-	private volatile int parties;
-	private volatile int waiting; 
+	private  int parties;
+	private  int index; 
 	
 	public CyclicBarrier(int parties) {
 		this.parties = parties;
-		this.waiting = 0;
+		this.index = parties;
 		this.semaphore = new Semaphore(parties); //TODO idk about semaphores
 	}
 	
@@ -19,28 +19,24 @@ public class CyclicBarrier {
 	 * @return index of arrival, where (parties -1) indicates the first one and zero the last to arrive.
 	 * 
 	 */
-	int await() throws InterruptedException {
-		int result = 0;
-		semaphore.acquire();
-		try{
-			waiting++;
-			result = parties - waiting;
-			if (parties - waiting > 0){
-				wait();
-			}
-			else {
-				waiting = 0;
-				notifyAll();
-			}
+	public synchronized int await() throws InterruptedException {
+	
+		
+		int myIndex = --index;
+		
+		if (myIndex == 0) {
+			index = parties;
+			notifyAll();
 		}
-		catch(Exception e){ 
-			System.out.println("Something went wrong, oops");
-		}
-		finally{
-			semaphore.release();
+		else{
+			wait();
 		}
 		
-		return result;
+		
+		semaphore.acquire();
+	
+		return myIndex;
+
 		
 		//if current thread is not the last 
 		//then disable it
