@@ -24,9 +24,7 @@ public class FairReadWriteLock {
 			wait();
 		}
 		
-		//TODO: I reversed  the order of the two statements. In the original order,
-		//if interrupted between the two, futureWriters and writers may both be temporarily 0,
-		//which would allow a read to begin
+		//TODO: implement logger
 		
 		writers++;
 		futureWriters--;
