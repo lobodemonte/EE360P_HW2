@@ -21,7 +21,6 @@ public class CyclicBarrier {
 	 */
 	public synchronized int await() throws InterruptedException {
 	
-		
 		int myIndex = --index;
 		
 		if (myIndex == 0) {
@@ -32,19 +31,9 @@ public class CyclicBarrier {
 			wait();
 		}
 		
-		
 		semaphore.acquire();
 	
 		return myIndex;
-
-		
-		//if current thread is not the last 
-		//then disable it
-		
-		//if current thread is the last 
-		//wake all up
-		
-		
 	}
 
 }
