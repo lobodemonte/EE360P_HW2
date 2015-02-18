@@ -6,20 +6,34 @@ public class FairReadWriteLock {
 	private int readers;
 	private int writers;
 	private int futureWriters;
+	private int futureReaders;
+	
+	private ReadWriteLockLogger log = new ReadWriteLockLogger();
 	
 	public FairReadWriteLock() {
 		readers = 0;
 		writers = 0;
 		futureWriters = 0;
+		futureReaders = 0;
 	}
 	public synchronized void beginRead() throws InterruptedException {
+		log.logTryToRead();
+		
+		futureReaders++;
 		while(writers > 0 || futureWriters > 0){
 			wait();
 		}
 		readers++;
+		futureReaders--;
+		
+		log.logBeginRead();
 	}
 	public synchronized void beginWrite() throws InterruptedException{
-		futureWriters++;//TODO stop adding future Writers when a reader is on front
+		log.logTryToWrite();
+		
+		int readersAhead = futureReaders;
+		
+		if(readersAhead == 0) futureWriters++;//TODO stop adding future Writers when a reader is on front
 		while(writers > 0 || readers > 0){
 			wait();
 		}
@@ -27,15 +41,18 @@ public class FairReadWriteLock {
 		//TODO: implement logger
 		
 		writers++;
-		futureWriters--;
+		if (readersAhead == 0)futureWriters--;
+		log.logBeginWrite();
 	}
 	public synchronized void endRead() throws InterruptedException {
 		readers--;
 		notifyAll();
+		log.logEndRead();
 	}
 	public synchronized void endWrite() throws InterruptedException{
 		writers--;
 		notifyAll();
+		log.logEndWrite();
 	}
 	
 	

@@ -3,7 +3,7 @@ package EL8779_SMT2436;
 public class CyclicBarrierTester {
 
 	
-	private static final int parties = 3;
+	private static final int parties = 2;
 	private static CyclicBarrier barrier = new CyclicBarrier(parties);
 	
 	public static void test(){
