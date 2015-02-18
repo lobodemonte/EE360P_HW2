@@ -21,30 +21,40 @@ public class FairReadWriteLock {
 		latestWrite = -1;
 	}
 	
-	public synchronized void beginRead() throws InterruptedException {
+	public synchronized void beginRead() {
 		log.logTryToRead();
 		numProcesses++;
 		int prevWrite = latestWrite;
 		nextTurnAssign++;
 		while(turn <= prevWrite ) {
-			wait();
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				System.out.println("Begin Read Wait Fail");
+				e.printStackTrace();
+			}
 		}
 		log.logBeginRead();
 	}
 	
-	public synchronized void beginWrite() throws InterruptedException{
+	public synchronized void beginWrite() {
 		log.logTryToWrite();
 		numProcesses++;
 		int myTurn = nextTurnAssign;
 		nextTurnAssign++;
 		latestWrite = myTurn;
 		while(myTurn != turn) {
-			wait();
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				System.out.println("Begin Write Wait Fail");
+				e.printStackTrace();
+			}
 		}	
 		log.logBeginWrite();
 	}
 	
-	public synchronized void endRead() throws InterruptedException {
+	public synchronized void endRead() {
 		turn++;
 		numProcesses--;
 		notifyAll();
@@ -54,7 +64,7 @@ public class FairReadWriteLock {
 		log.logEndRead();
 	}
 	
-	public synchronized void endWrite() throws InterruptedException{
+	public synchronized void endWrite() {
 		turn++;
 		numProcesses--;
 		notifyAll();	
