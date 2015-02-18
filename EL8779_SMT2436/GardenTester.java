@@ -2,11 +2,12 @@ package EL8779_SMT2436;
 
 public class GardenTester {
 
-	static int goal = 10;
+	static int goal;
 	static Garden garden;
 	
-	public static void test(){
+	public static void test(int goalNum){
 		
+		goal = goalNum;
 		garden = new Garden(10);
 		
 		Thread Newton = new Thread() {

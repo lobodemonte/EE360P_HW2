@@ -34,9 +34,11 @@ public class Garden {
 		
 	}
 	public void doneDigging(){
+		shovelLock.unlock(); //TODO: I moved this line from the end to the top. don't think it matters
+		//but to me it makes more to release shovelLock first b/c it was obtained inside workLock
 		moreEmptyHoles.signalAll();	//there are moreEmptyHoles
 		workLock.unlock();
-		shovelLock.unlock();	
+			
 	}
 	public void startSeeding() throws InterruptedException{
 		workLock.lock();

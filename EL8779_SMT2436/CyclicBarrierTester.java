@@ -10,12 +10,10 @@ public class CyclicBarrierTester {
 	
 	private static class NumberedThread extends Thread{
 		private int n;
-		private CyclicBarrier barrier;
 		
-		public NumberedThread(int num, CyclicBarrier b) {
+		public NumberedThread(int num) {
 			super();
 			n = num;
-			barrier = b;
 		}
 		
 		public void run() {
@@ -32,17 +30,17 @@ public class CyclicBarrierTester {
 	public static void test(int numParties, int numTests){
 		
 		parties = numParties;
-		CyclicBarrier barrier = new CyclicBarrier(parties);
+		barrier = new CyclicBarrier(parties);
 		NumberedThread nt;
 		int j = 1;
 		
 		for(int i = 0; i < numTests; i++) { //number of tests to run
 			for(int k = 0; k < numParties; k++) {				
-				nt = new NumberedThread(j, barrier);
+				nt = new NumberedThread(j);
 				j++;
 				nt.start();
 				
-				if(i % 2 == 0) { //alternate doing this every other test
+				if(i % 3 == 0) { //alternate doing this every other test
 					try {
 						TimeUnit.MILLISECONDS.sleep(500);
 						//sleep in an attempt to make threads receive indices in CyclicBarrier in a nice order
