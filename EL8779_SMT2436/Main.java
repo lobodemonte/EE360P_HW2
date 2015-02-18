@@ -10,7 +10,7 @@ public class Main {
 		
 		//CyclicBarrierTester.test(3, 5);
 		//GardenTester.test(50);
-		//FairReadWriteLockTester.test();
+		FairReadWriteLockTester.test(3, 3, 2);
 		
 		/*TODO: I redid CyclicBarrier, check it out
 		 * 

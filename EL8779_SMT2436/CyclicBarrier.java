@@ -36,7 +36,7 @@ public class CyclicBarrier {
 		if(myIndex == 0) { //last one has arrived
 			resetting.acquire(); //we're resetting everything now, release when all threads are done
 			index++; //index will now serve as a count for the number of threads released
-			everyone.release(); //release "everyone" that first visitor claimed
+			everyone.release(); //release "everyone" that first visitor acquired
 			mutex.release(); //release mutex b/c returning early
 			return 0;
 		}
@@ -72,7 +72,7 @@ public class CyclicBarrier {
 	 // @return index of arrival, where (parties -1) indicates the first one and zero the last to arrive.
 	  
 	 
-	public synchronized int await() throws InterruptedException {
+	public sqynchronize--d int await() throws InterruptedException {
 	
 		int myIndex = --index;
 		
