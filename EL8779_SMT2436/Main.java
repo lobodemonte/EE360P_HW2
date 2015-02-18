@@ -8,9 +8,9 @@ public class Main {
 
 	public static void main(String[] args) {
 		
-		//CyclicBarrierTester.test();
+		CyclicBarrierTester.test(5, 4);
 		//GardenTester.test();
-		FairReadWriteLockTester.test();
+		//FairReadWriteLockTester.test();
 
 
 	}

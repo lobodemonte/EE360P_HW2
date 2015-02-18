@@ -1,13 +1,60 @@
 package EL8779_SMT2436;
 
+import java.util.concurrent.TimeUnit;
+
 public class CyclicBarrierTester {
 
 	
-	private static final int parties = 2;
-	private static CyclicBarrier barrier = new CyclicBarrier(parties);
+	private static int parties;
+	private static CyclicBarrier barrier;
 	
-	public static void test(){
+	private static class NumberedThread extends Thread{
+		private int n;
+		private CyclicBarrier barrier;
 		
+		public NumberedThread(int num, CyclicBarrier b) {
+			super();
+			n = num;
+			barrier = b;
+		}
+		
+		public void run() {
+			try {
+				System.out.println("Thread t" + n + " arrived at: " + barrier.await());
+			}
+			catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void test(int numParties, int numTests){
+		
+		parties = numParties;
+		CyclicBarrier barrier = new CyclicBarrier(parties);
+		NumberedThread nt;
+		int j = 1;
+		
+		for(int i = 0; i < numTests; i++) { //number of tests to run
+			for(int k = 0; k < numParties; k++) {				
+				nt = new NumberedThread(j, barrier);
+				j++;
+				nt.start();
+				
+				if(i % 2 == 0) { //alternate doing this every other test
+					try {
+						TimeUnit.MILLISECONDS.sleep(500);
+						//sleep in an attempt to make threads receive indices in CyclicBarrier in a nice order
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} 
+				}
+			}
+		}
+		
+		/*
 		Thread t1 = new Thread() {
 			public void run() {
 				//while (true){
@@ -60,7 +107,7 @@ public class CyclicBarrierTester {
 		t1.start();
 		t2.start();
 		t3.start();
-		t4.start();
+		t4.start(); */
 		
 	}
 
