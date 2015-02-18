@@ -8,9 +8,9 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Garden implements GardenCounts {
 
 	private final int MAX_UNFILLEDHOLES;
-	private AtomicInteger emptyHoles;
-	private AtomicInteger seededHoles;
-	private AtomicInteger doneHoles;
+	private AtomicInteger emptyHoles = new AtomicInteger(0);
+	private AtomicInteger seededHoles = new AtomicInteger(0);
+	private AtomicInteger doneHoles = new AtomicInteger(0);
 	
 	private AtomicInteger totalDug = new AtomicInteger(0);
 	private AtomicInteger totalSeeded = new AtomicInteger(0);
@@ -25,14 +25,15 @@ public class Garden implements GardenCounts {
 	
 	public Garden(int MAX) {
 		this.MAX_UNFILLEDHOLES = MAX;
-		emptyHoles.set(0);
-		seededHoles.set(0);
-		doneHoles.set(0);
 	}	
-	public void startDigging() throws InterruptedException{	
+	public void startDigging(){	
 		workLock.lock();
 		while(emptyHoles.get()+seededHoles.get() >= MAX_UNFILLEDHOLES){
-			lessUnfilledHoles.await();  //await until there is lessEmptyHoles
+			try {
+				lessUnfilledHoles.await();
+			} catch (InterruptedException e) {
+				System.out.println("Dig up the hole failed");
+			}
 		}
 		shovelLock.lock();
 		emptyHoles.incrementAndGet();	
@@ -44,10 +45,14 @@ public class Garden implements GardenCounts {
 		workLock.unlock();
 			
 	}
-	public void startSeeding() throws InterruptedException{
+	public void startSeeding(){
 		workLock.lock();
 		while(emptyHoles.get() <= 0){
-			moreEmptyHoles.await();
+			try {
+				moreEmptyHoles.await();
+			} catch (InterruptedException e) {
+				System.out.println("Seeding of the hole failed");
+			}
 		}
 		seededHoles.incrementAndGet();
 		emptyHoles.decrementAndGet();
@@ -57,10 +62,14 @@ public class Garden implements GardenCounts {
 		moreSeededHoles.signalAll();	//there are moreSeededHoles
 		workLock.unlock();
 	}
-	public void startFilling() throws InterruptedException{
+	public void startFilling(){
 		workLock.lock();		
 		while(seededHoles.get() <= 0){
-			moreSeededHoles.await(); //wait until there are moreSeededHoles	
+			try {
+				moreSeededHoles.await();
+			} catch (InterruptedException e) {
+				System.out.println("Filling that hole failed");
+			} //wait until there are moreSeededHoles	
 		}	
 		shovelLock.lock();
 		seededHoles.decrementAndGet();

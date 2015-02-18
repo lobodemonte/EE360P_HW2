@@ -3,15 +3,7 @@ package EL8779_SMT2436;
 
 public class FairReadWriteLock {
 	
-	/*
-	private int readers;
-	private int writers;
-	private int futureWriters;
-	private int futureReaders;
-	*/
-	
 	private int numProcesses;
-	//private int latestRead;
 	private int latestWrite;
 	private int turn;
 	private int nextTurnAssign;
@@ -22,9 +14,7 @@ public class FairReadWriteLock {
 		numProcesses = 0;
 		initialize();
 	}
-	
-	//call whenever 
-	//I don't think synchronize is strictly needed but doesn't hurt
+
 	private synchronized void initialize() {
 		turn = 0;
 		nextTurnAssign = 0;
@@ -42,7 +32,6 @@ public class FairReadWriteLock {
 		log.logBeginRead();
 	}
 	
-	
 	public synchronized void beginWrite() throws InterruptedException{
 		log.logTryToWrite();
 		numProcesses++;
@@ -55,7 +44,6 @@ public class FairReadWriteLock {
 		log.logBeginWrite();
 	}
 	
-	
 	public synchronized void endRead() throws InterruptedException {
 		turn++;
 		numProcesses--;
@@ -66,7 +54,6 @@ public class FairReadWriteLock {
 		log.logEndRead();
 	}
 	
-	
 	public synchronized void endWrite() throws InterruptedException{
 		turn++;
 		numProcesses--;
@@ -76,8 +63,4 @@ public class FairReadWriteLock {
 		}
 		log.logEndWrite();
 	}
-	
-	
-	
-
 }

@@ -9,8 +9,8 @@ public class Main {
 	public static void main(String[] args) {
 		
 		//CyclicBarrierTester.test(3, 5);
-		//GardenTester.test(50);
-		FairReadWriteLockTester.test(3, 3, 2);
+		GardenTester.test(50);
+		//FairReadWriteLockTester.test(3, 3, 2);
 		
 		/*TODO: I redid CyclicBarrier, check it out
 		 * 

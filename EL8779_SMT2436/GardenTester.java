@@ -1,5 +1,7 @@
 package EL8779_SMT2436;
 
+import java.util.concurrent.TimeUnit;
+
 public class GardenTester {
 
 	static int goal;
@@ -15,8 +17,13 @@ public class GardenTester {
 				while (garden.count() < goal){
 					try {
 						try{
-						garden.startDigging();
-						}finally{garden.doneDigging();}
+							garden.startDigging();
+						}
+						finally{
+							System.out.println("Dug up: "+garden.totalHolesDugByNewton());
+							garden.doneDigging();
+							TimeUnit.MILLISECONDS.sleep(500);
+						}
 						
 					} catch (InterruptedException e) {
 						System.out.println("Newton the Digger Failed");
@@ -29,10 +36,12 @@ public class GardenTester {
 				while (garden.count() < goal){
 					try {
 						try{
-						garden.startSeeding();
+							garden.startSeeding();
 						}
 						finally{
+							System.out.println("Seeded up: "+garden.totalHolesSeededByBenjamin());
 							garden.doneSeeding();
+							TimeUnit.MILLISECONDS.sleep(500);
 						}	  
 					} catch (InterruptedException e) {
 						System.out.println("Benjamin the Seeder Failed");
@@ -48,7 +57,9 @@ public class GardenTester {
 						try{
 							garden.startFilling();
 						}finally{
+							System.out.println("Filled up: "+garden.totalHolesFilledByMary());
 							garden.doneFilling();
+							TimeUnit.MILLISECONDS.sleep(500);
 						}
 					} catch (InterruptedException e) {
 						System.out.println("Mary the Filler Failed");
@@ -61,25 +72,22 @@ public class GardenTester {
 		Thread All = new Thread() {
 			public void run() {
 				while (garden.count() < goal){
-					try {
-						garden.startDigging();
-						garden.doneDigging();
-						garden.startSeeding();
-						garden.doneSeeding();
-						garden.startFilling();
-						garden.doneFilling();
-					} catch (InterruptedException e) {
-						System.out.println("Omnipotent Worker Failed");
-					}
-
+					garden.startDigging();
+					garden.doneDigging();
+					garden.startSeeding();
+					garden.doneSeeding();
+					garden.startFilling();
+					garden.doneFilling();
 				}
 			}
 		};
 		
 		System.out.println("Starting...");
 		
-		Mary.start();
-		Newton.start();
+		//ExecutorService executor = Executors.newFixedThreadPool(5);
+		
+		Mary.start();		
+		Newton.start();		
 		Benjamin.start();
 		
 		try{
