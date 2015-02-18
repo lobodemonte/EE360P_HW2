@@ -1,15 +1,20 @@
 //Erik Lopez(el8779) and Sean Tubbs(smt2436)
 package EL8779_SMT2436;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Garden {
+public class Garden implements GardenCounts {
 
 	private final int MAX_UNFILLEDHOLES;
-	private volatile int emptyHoles;
-	private volatile int seededHoles;
-	private volatile int doneHoles;
+	private AtomicInteger emptyHoles;
+	private AtomicInteger seededHoles;
+	private AtomicInteger doneHoles;
+	
+	private AtomicInteger totalDug = new AtomicInteger(0);
+	private AtomicInteger totalSeeded = new AtomicInteger(0);
+	private AtomicInteger totalFilled = new AtomicInteger(0);
 	
 	ReentrantLock shovelLock = new ReentrantLock();
 	ReentrantLock workLock = new ReentrantLock();
@@ -20,33 +25,33 @@ public class Garden {
 	
 	public Garden(int MAX) {
 		this.MAX_UNFILLEDHOLES = MAX;
-		emptyHoles = 0;
-		seededHoles = 0;
-		doneHoles = 0;
+		emptyHoles.set(0);
+		seededHoles.set(0);
+		doneHoles.set(0);
 	}	
 	public void startDigging() throws InterruptedException{	
 		workLock.lock();
-		while(emptyHoles+seededHoles >= MAX_UNFILLEDHOLES){
+		while(emptyHoles.get()+seededHoles.get() >= MAX_UNFILLEDHOLES){
 			lessUnfilledHoles.await();  //await until there is lessEmptyHoles
 		}
 		shovelLock.lock();
-		emptyHoles++;
-		
+		emptyHoles.incrementAndGet();	
+		totalDug.incrementAndGet();
 	}
 	public void doneDigging(){
-		shovelLock.unlock(); //TODO: I moved this line from the end to the top. don't think it matters
-		//but to me it makes more to release shovelLock first b/c it was obtained inside workLock
-		moreEmptyHoles.signalAll();	//there are moreEmptyHoles
+		shovelLock.unlock(); 
+		moreEmptyHoles.signalAll();
 		workLock.unlock();
 			
 	}
 	public void startSeeding() throws InterruptedException{
 		workLock.lock();
-		while(emptyHoles <= 0){
+		while(emptyHoles.get() <= 0){
 			moreEmptyHoles.await();
 		}
-		seededHoles++;
-		emptyHoles--;
+		seededHoles.incrementAndGet();
+		emptyHoles.decrementAndGet();
+		totalSeeded.incrementAndGet();
 	}
 	public  void doneSeeding(){
 		moreSeededHoles.signalAll();	//there are moreSeededHoles
@@ -54,12 +59,13 @@ public class Garden {
 	}
 	public void startFilling() throws InterruptedException{
 		workLock.lock();		
-		while(seededHoles <= 0){
+		while(seededHoles.get() <= 0){
 			moreSeededHoles.await(); //wait until there are moreSeededHoles	
 		}	
 		shovelLock.lock();
-		seededHoles--;
-		doneHoles++;		
+		seededHoles.decrementAndGet();
+		doneHoles.incrementAndGet();
+		totalFilled.incrementAndGet();
 	}
 	public void doneFilling(){
 		shovelLock.unlock();
@@ -67,6 +73,18 @@ public class Garden {
 		workLock.unlock();
 	}
 	public int count(){
-		return doneHoles;
+		return doneHoles.get();
+	}
+	@Override
+	public int totalHolesDugByNewton() {
+		return totalDug.get();
+	}
+	@Override
+	public int totalHolesSeededByBenjamin() {
+		return totalDug.get();
+	}
+	@Override
+	public int totalHolesFilledByMary() {
+		return totalFilled.get();
 	}
 }
